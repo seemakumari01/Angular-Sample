@@ -1,0 +1,133 @@
+<mat-card class="tracc-card dashboard-card">
+  <div class="card-header" fxLayout="row" title="Your tasks">
+    <div class="card-header-title">
+      <label i18n="card header| tasks of the user@@YOURTASKS" style="font-size:22px;">YOUR TASKS</label>
+      <p class="card-header-subtitle" i18n="card header subtitle|help text@@ViewStatusOfAllProcessSteps">View the status of your process steps in this area.</p>
+    </div>
+  </div>
+
+  <!-- TODO: This error message isn't meaningful here (tasks aren't displayed here anymore...), should we even be doing the server call to fetch the info for this...?? -->
+  <!--<div i18n="@@errorMessageUnableLoadTask" *ngIf="loadStatus === serverCallStatus.Failed" class="card-inner-item description-grey">-->
+  <!--<h2>Unable to load your tasks</h2>Please retry later.-->
+  <!--</div>-->
+
+
+  <!-- <div class="tasks-category-container">
+      <div i18n="@@infoMessageTasksOverdue" *ngIf="nbOverdueTasks>0" class="task-category-heading" style="background-color: #f45b5b">
+        <label> You have {{ nbOverdueTasks }} overdue tasks!</label>
+    </div>
+    <div i18n="@@infoMessageTasksRecentlyAdded" *ngIf="nbTodoTasks>0" class="task-category-heading" style="background-color: #696c69">
+      <label>You have {{ nbTodoTasks }} new tasks to accept!</label>
+    </div>
+    <div i18n="@@infoMessageTasksInProgress" *ngIf="nbInProgressTasks>0" class="task-category-heading" style="background-color: #7cb5ec">
+      <label>You have {{ nbInProgressTasks }} tasks in progress</label>
+    </div>
+  </div> -->
+
+  <div *ngIf="loadStatus === loadStatusEnum.Loading && learningLoadStatus === loadStatusEnum.Loading" class="tasks-card-container">
+    <mat-spinner class="spinner"></mat-spinner>
+  </div>
+
+  <ng-container *ngIf="loadStatus === loadStatusEnum.LoadedEmpty && learningLoadStatus === loadStatusEnum.LoadedEmpty">
+    <div class="card-inner-item description-grey">
+      <h2 i18n="info message| user is up to date@@YoureUpToDate">You're up to date!</h2>
+      <ng-container i18n="info message|No tasks to display because no tasks are assigned to user@@NoTasksToDisplayNothingAssigned">No tasks are assigned to you. When you are assigned tasks they will appear here.</ng-container>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="loadStatus === loadStatusEnum.Loaded">
+    <!-- _______________________________ -->
+    <!-- \\\\\\\\\\\\ FILTER /////////// -->
+    <ng-container *ngIf="actualVsTarget && actualVsTarget.length > 6">
+      <button style="position: absolute;right: 15px;top: 50px;z-index: 999;" class="color-grey" [matMenuTriggerFor]="filterMenu" mat-icon-button mat-raised-button>
+        <i class="fa fa-filter" aria-hidden="true"></i>
+      </button>
+
+      <mat-menu #filterMenu="matMenu">
+        <button (click)="filter(6)" mat-menu-item i18n="button|6 months button@@6Months">6 months</button>
+        <button *ngIf="actualVsTarget.length > 12" (click)="filter(12)" mat-menu-item i18n="button|12 months button@@12Months">12 months</button>
+        <button *ngIf="actualVsTarget.length > 18" (click)="filter(18)" mat-menu-item i18n="button|18 months button@@18Months">18 months</button>
+      </mat-menu>
+
+      <div class="color-grey" style="position: absolute;left: 14px;top:60px;font-size: 12px;">
+        <span *ngIf="filterMonths" class="animated fadeIn">
+          <i class="fa fa-info-circle clickable-link" aria-hidden="true"></i>
+          <ng-container i18n="Showing x months data for the chart@@ShowingXMonthsOfData">Showing {{ filterMonths }} months data for the chart, </ng-container>
+          <span class="clickable-link" (click)="resetFilter()">
+            <i class="fa fa-times" aria-hidden="true"></i>
+            <ng-container i18n="remove month filter relating to chart|Remove month filter@@removeMonthFilter">remove filter</ng-container>
+          </span>
+        </span>
+      </div>
+    </ng-container>
+    <!-- \\\\\\\\\\\\ FILTER END /////////// -->
+
+    <div class="category-container" [ngStyle]="{'margin-top.px': actualVsTarget && actualVsTarget.length > 6 ? '15': '0'}">
+      <div *ngIf="nbOverdueTasks>0" class="category-section bg-colour-primary-red animated fadeIn" style="animation-duration: 200ms;">
+        <label>
+          <ng-container i18n="@@YourNumberOfProcessStepsOverdue">Your number of process steps overdue:</ng-container>
+          <span style="font-weight:bold;">{{ nbOverdueTasks || 0 }}</span>
+        </label>
+      </div>
+      <div *ngIf="nbInProgressTasks>0" class="category-section bg-colour-light-grey animated fadeIn" style="animation-duration: 400ms;">
+        <label>
+          <ng-container i18n="@@YourNumberOfProcessStepsPlanned">Your number of planned process steps:</ng-container>
+          <span style="font-weight:bold;">{{ nbInProgressTasks || 0 }}</span>
+        </label>
+      </div>
+      <div class="category-section bg-colour-primary-green animated fadeIn" style="animation-duration: 600ms;">
+        <!-- TODO : DISPLAY ACTUAL DATA -->
+        <label>
+          <ng-container i18n="@@YourNumberOfProcessStepsCompleted">Your number of completed process steps:</ng-container>
+          <span style="font-weight:bold;">{{ nbCompleteTasks || 0 }}</span>
+        </label>
+      </div>
+    </div>
+
+  </ng-container>
+
+  <div class="category-container">
+    <!--<div class="category-section bg-colour-primary-red">-->
+    <!--&lt;!&ndash; TO DO : DISPLAY ACTUAL DATA &ndash;&gt;-->
+    <!--<label>-->
+    <!--<ng-container i18n="@@YourNumberOfWorkshopActivitiesUrgent">Your number of urgent workshop activities:</ng-container>-->
+    <!--<span style="font-weight:bold;">0</span>-->
+    <!--</label>-->
+
+    <!--</div>-->
+    <div *ngIf="learningLoadStatus === loadStatusEnum.Loaded || (learningLoadStatus === loadStatusEnum.LoadedEmpty && loadStatus !== loadStatusEnum.LoadedEmpty)" class="category-section bg-colour-light-grey animated fadeIn" style="animation-duration: 800ms;">
+      <label>
+        <ng-container i18n="@@YourNumberOfWorkshopActivitiesPlanned">Your number of current learning activities:</ng-container>
+        <span style="font-weight:bold;">{{ learningTasks?.length || 0 }}</span>
+      </label>
+    </div>
+    <div *ngIf="learningLoadStatus === loadStatusEnum.Failed" class="category-section bg-colour-light-grey animated fadeIn" style="animation-duration: 800ms;">
+      <label>
+        <ng-container i18n="There was an error while loading your learning activities@@unableToLoadLearningActivities">There was an error while loading your learning activities.</ng-container>
+        <!-- <span style="font-weight:bold;">{{ learningTasks?.length || 0 }}</span> -->
+      </label>
+    </div>
+  </div>
+
+  <task-progress-chart *ngIf="loadStatus === loadStatusEnum.Loaded" [data]="filtered ? filtered : actualVsTarget"></task-progress-chart>
+
+
+  <div *ngIf="loadStatus === loadStatusEnum.Loading && learningLoadStatus !== loadStatusEnum.Loading" class="card-inner-item description-grey empty-dialogue" style="display:flex;">
+    <mat-spinner class="spinner"></mat-spinner>
+  </div>
+  <div *ngIf="loadStatus === loadStatusEnum.LoadedEmpty && learningLoadStatus !== loadStatusEnum.LoadedEmpty" class="card-inner-item description-grey empty-dialogue" style="display:flex;">
+    <h2 i18n="info message| Process Steps@@processSteps">Process Steps</h2>
+    <ng-container i18n="info message| No process step data available for you for this area@@NoProcessToDisplayForArea">No process step data available for you for this area.</ng-container>
+  </div>
+
+  <ng-container *ngIf="loadStatus === loadStatusEnum.Failed">
+    <div class="card-inner-item description-grey">
+      <h2>Error</h2>
+      <span i18n="@@ErrorMessageUnableLoadTaskSummary">Unable to load tasks Summary.</span>
+    </div>
+  </ng-container>
+
+  <div class="card-actions-custom" fxLayoutAlign="end center">
+    <button mat-button (click)="expandTasks() " i18n="@@VIEWALLTASKSbutton">VIEW ALL TASKS</button>
+  </div>
+</mat-card>
